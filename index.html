@@ -1,166 +1,215 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>LIVE RANKING - PUBG</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html,body { height: 100%; background: #ffffff; font-family: "Oswald", Arial, sans-serif; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FF Bermuda Drop Map</title>
 
-    /* Purple theme */
-    .board {
-      width: 420px;
-      margin: 20px auto;
-      background: #5A3FFB; /* PURPLE */
-      border-radius: 2px;
-      overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    .board .banner {
-      height: 96px;
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background:#3d2cca;
-    }
-
-    .board .title {
-      font-size: 36px;
-      letter-spacing: 3px;
-      color: #ffffff;
-      font-weight: 700;
-      width: 100%;
-      text-align: center;
-    }
-
-    /* Header */
-    .hdr {
-      display: grid;
-      grid-template-columns: 56px 1fr 60px 86px 56px;
-      align-items: center;
-      background: #1d173a;
-      color: #fff;
-      padding: 8px 12px;
-      font-weight: 700;
-      font-size: 16px;
-    }
-
-    .rows { width: 100%; }
-    .row {
-      display: grid;
-      grid-template-columns: 56px 1fr 60px 86px 56px;
-      align-items: center;
-      padding: 14px 12px;
-      column-gap: 6px;
-      background: rgba(255,255,255,0.06);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .row.alt { background: rgba(0,0,0,0.15); }
-
-    .rank {
-      font-size: 20px;
-      color: #fff;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .team {
-      text-align: center;
-      color: #fff;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .pts {
-      font-size: 22px;
-      text-align: center;
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .alive {
-      display:flex;
-      gap:4px;
-      justify-content:center;
-      color:#fff;
-      font-weight:bold;
-    }
-
-    .elims {
-      text-align:center;
-      font-size:20px;
-      color:#fff;
-      font-weight:700;
-    }
-  </style>
-</head>
-<body>
-  <div class="board" id="board">
-    <div class="banner">
-      <div class="title">LIVE RANKING</div>
-    </div>
-
-    <div class="hdr">
-      <div style="text-align:center">RANK</div>
-      <div style="text-align:center">TEAM</div>
-      <div style="text-align:center">PTS</div>
-      <div style="text-align:center">ALIVE</div>
-      <div style="text-align:center">ELIMS</div>
-    </div>
-
-    <div class="rows" id="rows"></div>
-  </div>
-
-<script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRilus17nDnHko-Sv-ysgA1O_XFmySDsF2lYYptGkjkk2W7Juqp8CZLtiypSdWLUh19c1fF1oxhm1V_/pub?gid=0&single=true&output=csv";
-
-function renderRow(idx, info) {
-  const row = document.createElement("div");
-  row.className = "row" + (idx % 2 === 1 ? " alt" : "");
-
-  row.innerHTML = `
-    <div class="rank">#${idx + 1}</div>
-    <div class="team">${info.team}</div>
-    <div class="pts">${info.points}</div>
-    <div class="alive">${"●".repeat(info.alive)}</div>
-    <div class="elims">${info.elims}</div>
-  `;
-  return row;
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
 }
 
-function renderLeaderboard(list) {
-  const container = document.getElementById("rows");
-  container.innerHTML = "";
-  list.forEach((t, i) => container.appendChild(renderRow(i, t)));
+body{
+  background:#1a1a1a;
+  color:white;
 }
 
-async function updateFromSheet() {
-  try {
-    const res = await fetch(SHEET_URL);
-    const text = await res.text();
-    const rows = text.split("\n").slice(1).filter(r => r.trim() !== "").map(r => r.split(","));
+.header{
+  background:#222;
+  padding:15px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+}
 
-    const formatted = rows.map(r => ({
-      team: r[1].trim(),
-      points: r[2].trim(),
-      alive: Number(r[3].trim()) || 0,
-      elims: Number(r[4].trim()) || 0
-    }));
+.controls{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:15px;
+  background:#222;
+}
 
-    renderLeaderboard(formatted);
-  } catch (err) {
-    console.error("Failed to update leaderboard:", err);
+input, select, button{
+  padding:10px;
+  border-radius:6px;
+  border:none;
+}
+
+select{
+  background:#333;
+  color:white;
+}
+
+button{
+  background:#28a745;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.download-btn{
+  background:#007bff;
+}
+
+.map-container{
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+
+.map{
+  position:relative;
+  width:900px;
+  height:900px;
+  background:url("https://i.postimg.cc/HsdDvbmn/IMG-7352.jpg") center/cover no-repeat;
+  overflow:hidden;
+}
+
+.team-marker{
+  position:absolute;
+  transform:translate(-50%,-50%);
+}
+
+.team-logo{
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #28a745;
+  background:white;
+  box-shadow:0 4px 10px rgba(0,0,0,0.5);
+}
+
+@media(max-width:950px){
+  .map{
+    width:95vw;
+    height:95vw;
+  }
+
+  .team-logo{
+    width:45px;
+    height:45px;
   }
 }
+</style>
+</head>
 
-// Auto-update every 1 second
-setInterval(updateFromSheet, 1000);
-updateFromSheet();
+<body>
+
+<div class="header">FREE FIRE BERMUDA DROP MAP</div>
+
+<div class="controls">
+  <input type="file" id="logoInput" accept="image/*">
+
+  <select id="location">
+    <option value="peak">Peak</option>
+    <option value="clocktower">Clock Tower</option>
+    <option value="factory">Factory</option>
+    <option value="pochinok">Pochinok</option>
+    <option value="mill">Mill</option>
+    <option value="riverside">Riverside</option>
+    <option value="shipyard">Shipyard</option>
+    <option value="graveyard">Graveyard</option>
+    <option value="bullseye">Bullseye</option>
+    <option value="hangar">Hangar</option>
+    <option value="observatory">Observatory</option>
+    <option value="rimnam">Rim Nam</option>
+    <option value="marselectric">Mars Electric</option>
+    <option value="katulistiwa">Katulistiwa</option>
+    <option value="plantation">Plantation</option>
+    <option value="bimasakti">Bimasakti Strip</option>
+    <option value="capetown">Cape Town</option>
+    <option value="kotatua">Kota Tua</option>
+    <option value="keraton">Keraton</option>
+    <option value="sentosa">Sentosa</option>
+  </select>
+
+  <button onclick="addLogo()">Add Team</button>
+  <button onclick="clearMap()">Clear Map</button>
+  <button class="download-btn" onclick="downloadMap()">Download Pic</button>
+</div>
+
+<div class="map-container">
+  <div class="map" id="map"></div>
+</div>
+
+<script>
+const places = {
+  shipyard:{x:45,y:13},
+  bullseye:{x:28,y:22},
+  graveyard:{x:22,y:35},
+  observatory:{x:10,y:45},
+  hangar:{x:22,y:63},
+  rimnam:{x:12,y:84},
+  clocktower:{x:36,y:60},
+  factory:{x:47,y:70},
+  pochinok:{x:58,y:77},
+  marselectric:{x:53,y:90},
+  katulistiwa:{x:35,y:40},
+  bimasakti:{x:47,y:48},
+  plantation:{x:53,y:35},
+  peak:{x:61,y:58},
+  riverside:{x:62,y:32},
+  mill:{x:75,y:36},
+  keraton:{x:87,y:42},
+  capetown:{x:88,y:60},
+  kotatua:{x:76,y:68},
+  sentosa:{x:87,y:82}
+};
+
+function addLogo(){
+  const file = document.getElementById("logoInput").files[0];
+
+  if(!file){
+    alert("Please select team logo first");
+    return;
+  }
+
+  const location = document.getElementById("location").value;
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    const marker = document.createElement("div");
+    marker.className = "team-marker";
+
+    marker.style.left = places[location].x + "%";
+    marker.style.top = places[location].y + "%";
+
+    marker.innerHTML = `<img src="${e.target.result}" class="team-logo">`;
+
+    document.getElementById("map").appendChild(marker);
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function clearMap(){
+  document.getElementById("map").innerHTML = "";
+}
+
+function downloadMap(){
+  const map = document.getElementById("map");
+
+  html2canvas(map, {
+    useCORS:true,
+    backgroundColor:null,
+    scale:2
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "bermuda-drop-map.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
 </script>
+
 </body>
 </html>
