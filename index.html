@@ -165,6 +165,8 @@ const places = {
   sentosa:{x:87,y:82}
 };
 
+const locationCount = {};
+
 function addLogo(){
   const file = document.getElementById("logoInput").files[0];
 
@@ -174,14 +176,28 @@ function addLogo(){
   }
 
   const location = document.getElementById("location").value;
+
+  if(!locationCount[location]){
+    locationCount[location] = 0;
+  }
+
+  const count = locationCount[location];
+  locationCount[location]++;
+
+  const radius = count === 0 ? 0 : 42;
+  const angle = count * 60 * Math.PI / 180;
+
+  const offsetX = Math.cos(angle) * radius;
+  const offsetY = Math.sin(angle) * radius;
+
   const reader = new FileReader();
 
   reader.onload = function(e){
     const marker = document.createElement("div");
     marker.className = "team-marker";
 
-    marker.style.left = places[location].x + "%";
-    marker.style.top = places[location].y + "%";
+    marker.style.left = `calc(${places[location].x}% + ${offsetX}px)`;
+    marker.style.top = `calc(${places[location].y}% + ${offsetY}px)`;
 
     marker.innerHTML = `<img src="${e.target.result}" class="team-logo">`;
 
@@ -193,16 +209,20 @@ function addLogo(){
 
 function clearMap(){
   document.getElementById("map").innerHTML = "";
+
+  for(let key in locationCount){
+    locationCount[key] = 0;
+  }
 }
 
 function downloadMap(){
   const map = document.getElementById("map");
 
-  html2canvas(map, {
+  html2canvas(map,{
     useCORS:true,
     backgroundColor:null,
     scale:2
-  }).then(canvas => {
+  }).then(canvas=>{
     const link = document.createElement("a");
     link.download = "bermuda-drop-map.png";
     link.href = canvas.toDataURL("image/png");
